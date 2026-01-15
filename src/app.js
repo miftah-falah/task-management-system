@@ -410,4 +410,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = { app, initializeApp };
 } else {
     window.app = app; // Expose to window for debugging
-}
+}// Search functionality
