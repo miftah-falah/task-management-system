@@ -411,3 +411,4 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.app = app; // Expose to window for debugging
 }// Bug fix
+// Bug fix
