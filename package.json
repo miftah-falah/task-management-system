@@ -8,6 +8,7 @@
     "dev": "node server.js",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src/",
     "format": "prettier --write src/",
     "validate": "node validate-setup.js"
