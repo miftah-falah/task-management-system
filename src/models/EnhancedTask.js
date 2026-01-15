@@ -1,9 +1,8 @@
 /**
  * Enhanced Task Model - Task dengan fitur tambahan untuk Day 2
- * 
- * Fitur baru:
+ * * Fitur baru:
  * - Multi-user support (owner dan assignee)
- * - Categories dan tags
+ * - Categories dan tags (Dynamic Validation)
  * - Due dates dengan overdue detection
  * - Status yang lebih detail
  * - Time tracking
@@ -27,6 +26,7 @@ class EnhancedTask {
         this._assigneeId = options.assigneeId || ownerId; // default assigned to owner
         
         // Properties baru untuk Day 2
+        // NOTE: Sekarang menggunakan validasi dinamis
         this._category = this._validateCategory(options.category || 'personal');
         this._tags = Array.isArray(options.tags) ? options.tags : [];
         this._priority = this._validatePriority(options.priority || 'medium');
@@ -47,14 +47,25 @@ class EnhancedTask {
         this._attachments = [];
     }
     
-    // Getter methods
+    // --- STATIC METHODS (New) ---
+
+    /**
+     * Get available categories (Single Source of Truth)
+     * @returns {string[]} - Array of valid categories
+     */
+    static getAvailableCategories() {
+        // 'shopping' ditambahkan disini dan otomatis dikenali validasi
+        return ['work', 'personal', 'study', 'health', 'finance', 'shopping', 'other'];
+    }
+
+    // --- GETTERS ---
     get id() { return this._id; }
     get title() { return this._title; }
     get description() { return this._description; }
     get ownerId() { return this._ownerId; }
     get assigneeId() { return this._assigneeId; }
     get category() { return this._category; }
-    get tags() { return [...this._tags]; } // return copy
+    get tags() { return [...this._tags]; } 
     get priority() { return this._priority; }
     get status() { return this._status; }
     get dueDate() { return this._dueDate; }
@@ -66,7 +77,7 @@ class EnhancedTask {
     get notes() { return [...this._notes]; }
     get attachments() { return [...this._attachments]; }
     
-    // Computed properties (properties yang dihitung)
+    // --- COMPUTED PROPERTIES ---
     get isCompleted() {
         return this._status === 'completed';
     }
@@ -87,8 +98,24 @@ class EnhancedTask {
         if (this._estimatedHours === 0) return 0;
         return Math.min(100, (this._actualHours / this._estimatedHours) * 100);
     }
+
+    /**
+     * Get category display name (Formatted)
+     */
+    get categoryDisplayName() {
+        const categoryNames = {
+            'work': 'Work & Business',
+            'personal': 'Personal',
+            'study': 'Study & Learning',
+            'health': 'Health & Fitness',
+            'finance': 'Finance & Money',
+            'shopping': 'Shopping',
+            'other': 'Other'
+        };
+        return categoryNames[this._category] || this._category;
+    }
     
-    // Public methods untuk operasi task
+    // --- PUBLIC METHODS ---
     updateTitle(newTitle) {
         if (!newTitle || newTitle.trim() === '') {
             throw new Error('Judul task tidak boleh kosong');
@@ -105,6 +132,13 @@ class EnhancedTask {
     updateCategory(newCategory) {
         this._category = this._validateCategory(newCategory);
         this._updateTimestamp();
+    }
+
+    /**
+     * Check if task belongs to specific category
+     */
+    isInCategory(category) {
+        return this._category === category;
     }
     
     addTag(tag) {
@@ -131,7 +165,6 @@ class EnhancedTask {
         const oldStatus = this._status;
         this._status = this._validateStatus(newStatus);
         
-        // Set completed timestamp jika status berubah ke completed
         if (newStatus === 'completed' && oldStatus !== 'completed') {
             this._completedAt = new Date();
         } else if (newStatus !== 'completed') {
@@ -174,7 +207,7 @@ class EnhancedTask {
         }
     }
     
-    // Convert ke JSON untuk penyimpanan
+    // --- SERIALIZATION ---
     toJSON() {
         return {
             id: this._id,
@@ -197,7 +230,6 @@ class EnhancedTask {
         };
     }
     
-    // Create Task dari data JSON
     static fromJSON(data) {
         const task = new EnhancedTask(data.title, data.description, data.ownerId, {
             assigneeId: data.assigneeId,
@@ -220,7 +252,7 @@ class EnhancedTask {
         return task;
     }
     
-    // Private helper methods
+    // --- PRIVATE HELPERS ---
     _generateId() {
         return 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
@@ -230,7 +262,9 @@ class EnhancedTask {
     }
     
     _validateCategory(category) {
-        const validCategories = ['work', 'personal', 'study', 'health', 'finance', 'other'];
+        // PERBAIKAN: Mengambil list dari static method agar konsisten
+        const validCategories = EnhancedTask.getAvailableCategories();
+        
         if (!validCategories.includes(category)) {
             throw new Error(`Kategori tidak valid: ${category}. Harus salah satu dari: ${validCategories.join(', ')}`);
         }
@@ -254,7 +288,7 @@ class EnhancedTask {
     }
 }
 
-// Export untuk digunakan di file lain
+// Export
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = EnhancedTask;
 } else {

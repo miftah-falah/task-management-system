@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Management System - Day 2</title>
     <link rel="stylesheet" href="styles.css">
-    
 </head>
 <body>
     <div class="app-container">
-        <!-- Header dengan User Info -->
         <header class="app-header">
             <div class="header-content">
                 <h1>Task Management System</h1>
@@ -30,53 +28,47 @@
             </div>
         </header>
 
-        <!-- Messages Container -->
         <div id="messages" class="messages-container"></div>
 
-        <!-- Main Content -->
         <main class="main-content" id="mainContent" style="display: none;">
             
-            <!-- Task Statistics -->
             <section class="stats-section">
                 <h2>Dashboard</h2>
                 <div id="taskStats" class="stats-container">
-                    <!-- Stats akan di-render di sini -->
-                </div>
+                    </div>
             </section>
 
-            <!-- Quick Actions -->
             <section class="quick-actions">
                 <button id="showOverdueBtn" class="btn btn-warning">Lihat Overdue Tasks</button>
                 <button id="showDueSoonBtn" class="btn btn-info">Tasks Due Soon</button>
                 <button id="exportDataBtn" class="btn btn-outline">Export Data</button>
             </section>
 
-            <!-- Task Creation Form -->
             <section class="form-section">
                 <h2>Buat Task Baru</h2>
                 <form id="taskForm" class="task-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="taskTitle">Judul Task *</label>
-                            <input type="text" id="taskTitle" name="title" required placeholder="Masukkan judul task">
+                            <input type="text" id="taskTitle" name="title" required placeholder="Apa yang ingin dikerjakan?">
                         </div>
                         
                         <div class="form-group">
                             <label for="taskCategory">Kategori</label>
                             <select id="taskCategory" name="category">
                                 <option value="personal">Personal</option>
-                                <option value="work">Work</option>
-                                <option value="study">Study</option>
-                                <option value="health">Health</option>
-                                <option value="finance">Finance</option>
-                                <option value="other">Other</option>
+                                <option value="work">Work & Business</option>
+                                <option value="study">Study & Learning</option>
+                                <option value="health">Health & Fitness</option>
+                                <option value="finance">Finance & Money</option>
+                                <option value="shopping">Shopping</option> <option value="other">Other</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label for="taskDescription">Deskripsi</label>
-                        <textarea id="taskDescription" name="description" placeholder="Deskripsi task (opsional)" rows="3"></textarea>
+                        <textarea id="taskDescription" name="description" placeholder="Deskripsi detail (opsional)" rows="3"></textarea>
                     </div>
                     
                     <div class="form-row">
@@ -103,7 +95,7 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="taskTags">Tags (pisahkan dengan koma)</label>
+                            <label for="taskTags">Tags (pisahkan koma)</label>
                             <input type="text" id="taskTags" name="tags" placeholder="urgent, meeting, project">
                         </div>
                         
@@ -111,8 +103,7 @@
                             <label for="taskAssignee">Assign ke</label>
                             <select id="taskAssignee" name="assigneeId">
                                 <option value="self">Diri Sendiri</option>
-                                <!-- Options akan diisi dari JavaScript -->
-                            </select>
+                                </select>
                         </div>
                     </div>
                     
@@ -120,7 +111,6 @@
                 </form>
             </section>
 
-            <!-- Search dan Filter -->
             <section class="search-filter-section">
                 <div class="search-container">
                     <h2>Cari & Filter Tasks</h2>
@@ -132,7 +122,7 @@
                             <option value="title-asc">Judul A-Z</option>
                             <option value="title-desc">Judul Z-A</option>
                             <option value="priority-desc">Prioritas Tinggi</option>
-                            <option value="dueDate-asc">Due Date</option>
+                            <option value="dueDate-asc">Deadline Terdekat</option>
                         </select>
                     </div>
                 </div>
@@ -147,7 +137,6 @@
                                 <button class="filter-btn" data-filter="pending">Pending</button>
                                 <button class="filter-btn" data-filter="in-progress">In Progress</button>
                                 <button class="filter-btn" data-filter="completed">Completed</button>
-                                <button class="filter-btn" data-filter="blocked">Blocked</button>
                             </div>
                         </div>
                         
@@ -157,7 +146,6 @@
                                 <button class="filter-btn" data-filter="urgent">Urgent</button>
                                 <button class="filter-btn" data-filter="high">High</button>
                                 <button class="filter-btn" data-filter="medium">Medium</button>
-                                <button class="filter-btn" data-filter="low">Low</button>
                             </div>
                         </div>
                         
@@ -168,28 +156,27 @@
                                 <button class="filter-btn" data-filter="personal">Personal</button>
                                 <button class="filter-btn" data-filter="study">Study</button>
                                 <button class="filter-btn" data-filter="health">Health</button>
+                                <button class="filter-btn" data-filter="finance">Finance</button>
+                                <button class="filter-btn" data-filter="shopping">Shopping</button> <button class="filter-btn" data-filter="other">Other</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Task List -->
             <section class="tasks-section">
                 <div class="tasks-header">
-                    <h2>Your Tasks</h2>
+                    <h2>Daftar Task</h2>
                     <div class="tasks-actions">
-                        <button id="clearAllTasks" class="btn btn-danger">Clear All</button>
                         <button id="refreshTasks" class="btn btn-outline">Refresh</button>
+                        <button id="clearAllTasks" class="btn btn-danger">Hapus Semua</button>
                     </div>
                 </div>
                 <div id="taskList" class="task-list">
-                    <!-- Tasks akan di-render di sini -->
-                </div>
+                    </div>
             </section>
         </main>
 
-        <!-- Registration Modal -->
         <div id="registerModal" class="modal" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -217,14 +204,12 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <footer class="app-footer">
             <p>&copy; 2024 Software Engineering Shortcourse - Day 2 Implementation</p>
             <p>MVC Pattern • Repository Pattern • Enhanced Models</p>
         </footer>
     </div>
 
-    <!-- Load JavaScript modules dalam urutan yang benar -->
     <script src="/src/models/User.js"></script>
     <script src="/src/models/EnhancedTask.js"></script>
     <script src="/src/utils/EnhancedStorageManager.js"></script>

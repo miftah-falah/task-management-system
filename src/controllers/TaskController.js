@@ -1,7 +1,6 @@
 /**
  * Task Controller - Mengatur alur kerja task management
- * 
- * Controller dalam MVC Pattern:
+ * * Controller dalam MVC Pattern:
  * - Menerima input dari user (via View)
  * - Memproses dengan bantuan Model dan Repository
  * - Mengirim response kembali ke View
@@ -32,20 +31,13 @@ class TaskController {
      */
     createTask(taskData) {
         try {
-            // Validasi: user harus login
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
-            // Validasi input
+            // Validasi input dasar
             if (!taskData.title || taskData.title.trim() === '') {
-                return {
-                    success: false,
-                    error: 'Judul task wajib diisi'
-                };
+                return { success: false, error: 'Judul task wajib diisi' };
             }
             
             // Set owner ke current user
@@ -59,10 +51,7 @@ class TaskController {
             if (taskToCreate.assigneeId !== this.currentUser.id) {
                 const assignee = this.userRepository.findById(taskToCreate.assigneeId);
                 if (!assignee) {
-                    return {
-                        success: false,
-                        error: 'User yang di-assign tidak ditemukan'
-                    };
+                    return { success: false, error: 'User yang di-assign tidak ditemukan' };
                 }
             }
             
@@ -76,10 +65,7 @@ class TaskController {
             };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
@@ -91,10 +77,7 @@ class TaskController {
     getTasks(filters = {}) {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             // Set filter untuk current user
@@ -118,10 +101,7 @@ class TaskController {
             };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
@@ -133,39 +113,24 @@ class TaskController {
     getTask(taskId) {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             const task = this.taskRepository.findById(taskId);
             
             if (!task) {
-                return {
-                    success: false,
-                    error: 'Task tidak ditemukan'
-                };
+                return { success: false, error: 'Task tidak ditemukan' };
             }
             
             // Cek permission: hanya owner atau assignee yang bisa lihat
             if (task.ownerId !== this.currentUser.id && task.assigneeId !== this.currentUser.id) {
-                return {
-                    success: false,
-                    error: 'Anda tidak memiliki akses ke task ini'
-                };
+                return { success: false, error: 'Anda tidak memiliki akses ke task ini' };
             }
             
-            return {
-                success: true,
-                data: task
-            };
+            return { success: true, data: task };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
@@ -178,37 +143,25 @@ class TaskController {
     updateTask(taskId, updates) {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             const task = this.taskRepository.findById(taskId);
             
             if (!task) {
-                return {
-                    success: false,
-                    error: 'Task tidak ditemukan'
-                };
+                return { success: false, error: 'Task tidak ditemukan' };
             }
             
             // Cek permission: hanya owner yang bisa update
             if (task.ownerId !== this.currentUser.id) {
-                return {
-                    success: false,
-                    error: 'Hanya owner yang bisa mengubah task'
-                };
+                return { success: false, error: 'Hanya owner yang bisa mengubah task' };
             }
             
             // Validasi assignee jika ada update
             if (updates.assigneeId) {
                 const assignee = this.userRepository.findById(updates.assigneeId);
                 if (!assignee) {
-                    return {
-                        success: false,
-                        error: 'User yang di-assign tidak ditemukan'
-                    };
+                    return { success: false, error: 'User yang di-assign tidak ditemukan' };
                 }
             }
             
@@ -222,10 +175,7 @@ class TaskController {
             };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
@@ -237,49 +187,29 @@ class TaskController {
     deleteTask(taskId) {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             const task = this.taskRepository.findById(taskId);
             
             if (!task) {
-                return {
-                    success: false,
-                    error: 'Task tidak ditemukan'
-                };
+                return { success: false, error: 'Task tidak ditemukan' };
             }
             
-            // Cek permission: hanya owner yang bisa hapus
             if (task.ownerId !== this.currentUser.id) {
-                return {
-                    success: false,
-                    error: 'Hanya owner yang bisa menghapus task'
-                };
+                return { success: false, error: 'Hanya owner yang bisa menghapus task' };
             }
             
-            // Hapus task melalui repository
             const deleted = this.taskRepository.delete(taskId);
             
             if (deleted) {
-                return {
-                    success: true,
-                    message: `Task "${task.title}" berhasil dihapus`
-                };
+                return { success: true, message: `Task "${task.title}" berhasil dihapus` };
             } else {
-                return {
-                    success: false,
-                    error: 'Gagal menghapus task'
-                };
+                return { success: false, error: 'Gagal menghapus task' };
             }
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
@@ -293,18 +223,12 @@ class TaskController {
             const task = this.taskRepository.findById(taskId);
             
             if (!task) {
-                return {
-                    success: false,
-                    error: 'Task tidak ditemukan'
-                };
+                return { success: false, error: 'Task tidak ditemukan' };
             }
             
             // Assignee juga bisa toggle status
             if (task.ownerId !== this.currentUser.id && task.assigneeId !== this.currentUser.id) {
-                return {
-                    success: false,
-                    error: 'Anda tidak memiliki akses ke task ini'
-                };
+                return { success: false, error: 'Anda tidak memiliki akses ke task ini' };
             }
             
             const newStatus = task.isCompleted ? 'pending' : 'completed';
@@ -317,10 +241,7 @@ class TaskController {
             };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
@@ -332,17 +253,11 @@ class TaskController {
     searchTasks(query) {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             if (!query || query.trim() === '') {
-                return {
-                    success: false,
-                    error: 'Query pencarian tidak boleh kosong'
-                };
+                return { success: false, error: 'Query pencarian tidak boleh kosong' };
             }
             
             // Search semua task, lalu filter untuk current user
@@ -359,52 +274,34 @@ class TaskController {
             };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
     /**
-     * Get task statistics
-     * @returns {Object} - Response dengan statistik task
+     * Get task statistics (General)
      */
     getTaskStats() {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             const stats = this.taskRepository.getStats(this.currentUser.id);
-            
-            return {
-                success: true,
-                data: stats
-            };
+            return { success: true, data: stats };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
     /**
      * Get overdue tasks
-     * @returns {Object} - Response dengan task yang overdue
      */
     getOverdueTasks() {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             const overdueTasks = this.taskRepository.findOverdue()
@@ -417,25 +314,17 @@ class TaskController {
             };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+            return { success: false, error: error.message };
         }
     }
     
     /**
      * Get tasks due soon
-     * @param {number} days - Jumlah hari ke depan
-     * @returns {Object} - Response dengan task yang akan due
      */
     getTasksDueSoon(days = 3) {
         try {
             if (!this.currentUser) {
-                return {
-                    success: false,
-                    error: 'User harus login terlebih dahulu'
-                };
+                return { success: false, error: 'User harus login terlebih dahulu' };
             }
             
             const dueSoonTasks = this.taskRepository.findDueSoon(days)
@@ -448,10 +337,163 @@ class TaskController {
             };
             
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
+            return { success: false, error: error.message };
+        }
+    }
+
+    // --- NEW METHODS FOR CATEGORIES ---
+
+    /**
+     * Get tasks by category
+     * @param {string} category - Category to filter by
+     * @returns {Object} - Response dengan filtered tasks
+     */
+    getTasksByCategory(category) {
+        try {
+            if (!this.currentUser) {
+                return { success: false, error: 'User harus login terlebih dahulu' };
+            }
+            
+            // Validate category using EnhancedTask static method
+            const validCategories = EnhancedTask.getAvailableCategories();
+            if (!validCategories.includes(category)) {
+                return { success: false, error: 'Kategori tidak valid' };
+            }
+            
+            // OPTIMISASI: Gunakan repo.filter untuk efisiensi
+            const categoryTasks = this.taskRepository.filter({
+                ownerId: this.currentUser.id,
+                category: category
+            });
+            
+            // Sort by priority (default)
+            const sortedTasks = this.taskRepository.sort(categoryTasks, 'priority', 'desc');
+            
+            // Helper untuk display name (Tanpa Prototype Hack)
+            const getDisplayName = (cat) => {
+                const names = {
+                    'work': 'Work & Business', 'personal': 'Personal', 'study': 'Study & Learning',
+                    'health': 'Health & Fitness', 'finance': 'Finance & Money', 'shopping': 'Shopping', 'other': 'Other'
+                };
+                return names[cat] || cat;
             };
+            
+            return {
+                success: true,
+                data: sortedTasks,
+                count: sortedTasks.length,
+                category: category,
+                categoryDisplayName: getDisplayName(category)
+            };
+            
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Get category statistics for current user
+     * @returns {Object} - Response dengan category statistics
+     */
+    getCategoryStats() {
+        try {
+            if (!this.currentUser) {
+                return { success: false, error: 'User harus login terlebih dahulu' };
+            }
+            
+            // Menggunakan method baru dari Repository
+            const stats = this.taskRepository.getCategoryStats(this.currentUser.id);
+            const mostUsed = this.taskRepository.getMostUsedCategories(this.currentUser.id);
+            
+            return {
+                success: true,
+                data: {
+                    byCategory: stats,
+                    mostUsed: mostUsed,
+                    totalCategories: Object.keys(stats).filter(cat => stats[cat].total > 0).length
+                }
+            };
+            
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Update task category
+     * @param {string} taskId - Task ID
+     * @param {string} newCategory - New category
+     * @returns {Object} - Response dengan updated task
+     */
+    updateTaskCategory(taskId, newCategory) {
+        try {
+            if (!this.currentUser) {
+                return { success: false, error: 'User harus login terlebih dahulu' };
+            }
+            
+            const task = this.taskRepository.findById(taskId);
+            
+            if (!task) {
+                return { success: false, error: 'Task tidak ditemukan' };
+            }
+            
+            // Check permission
+            if (task.ownerId !== this.currentUser.id) {
+                return { success: false, error: 'Hanya owner yang bisa mengubah kategori task' };
+            }
+            
+            // Validate category
+            const validCategories = EnhancedTask.getAvailableCategories();
+            if (!validCategories.includes(newCategory)) {
+                return { success: false, error: 'Kategori tidak valid' };
+            }
+            
+            // Update category
+            const updatedTask = this.taskRepository.update(taskId, { category: newCategory });
+            
+            return {
+                success: true,
+                data: updatedTask,
+                // Mengakses getter 'categoryDisplayName' dari instance task
+                message: `Kategori task berhasil diubah ke ${updatedTask.categoryDisplayName}`
+            };
+            
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Get available categories for Dropdown UI
+     * @returns {Object} - Response dengan available categories
+     */
+    getAvailableCategories() {
+        try {
+            const categories = EnhancedTask.getAvailableCategories();
+            
+            // Mapping untuk UI Label
+            const categoryNames = {
+                'work': 'Work & Business',
+                'personal': 'Personal',
+                'study': 'Study & Learning',
+                'health': 'Health & Fitness',
+                'finance': 'Finance & Money',
+                'shopping': 'Shopping',
+                'other': 'Other'
+            };
+
+            const categoriesWithDisplay = categories.map(category => ({
+                value: category,
+                label: categoryNames[category] || category
+            }));
+            
+            return {
+                success: true,
+                data: categoriesWithDisplay
+            };
+            
+        } catch (error) {
+            return { success: false, error: error.message };
         }
     }
 }
