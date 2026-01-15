@@ -1,7 +1,6 @@
 /**
  * Task Repository - Mengelola penyimpanan dan pengambilan data Task
- * 
- * Repository Pattern untuk Task dengan fitur:
+ * * Repository Pattern untuk Task dengan fitur:
  * - CRUD operations
  * - Query methods (filter, search, sort)
  * - User-specific operations
@@ -32,7 +31,7 @@ class TaskRepository {
                 taskData.title,
                 taskData.description,
                 taskData.ownerId,
-                taskData
+                taskData // options passed as the rest object
             );
             
             // Simpan ke cache
@@ -153,42 +152,18 @@ class TaskRepository {
         
         try {
             // Apply updates berdasarkan property yang ada
-            if (updates.title !== undefined) {
-                task.updateTitle(updates.title);
-            }
-            if (updates.description !== undefined) {
-                task.updateDescription(updates.description);
-            }
-            if (updates.category !== undefined) {
-                task.updateCategory(updates.category);
-            }
-            if (updates.priority !== undefined) {
-                task.updatePriority(updates.priority);
-            }
-            if (updates.status !== undefined) {
-                task.updateStatus(updates.status);
-            }
-            if (updates.dueDate !== undefined) {
-                task.setDueDate(updates.dueDate);
-            }
-            if (updates.assigneeId !== undefined) {
-                task.assignTo(updates.assigneeId);
-            }
-            if (updates.estimatedHours !== undefined) {
-                task.setEstimatedHours(updates.estimatedHours);
-            }
-            if (updates.addTimeSpent !== undefined) {
-                task.addTimeSpent(updates.addTimeSpent);
-            }
-            if (updates.addTag !== undefined) {
-                task.addTag(updates.addTag);
-            }
-            if (updates.removeTag !== undefined) {
-                task.removeTag(updates.removeTag);
-            }
-            if (updates.addNote !== undefined) {
-                task.addNote(updates.addNote);
-            }
+            if (updates.title !== undefined) task.updateTitle(updates.title);
+            if (updates.description !== undefined) task.updateDescription(updates.description);
+            if (updates.category !== undefined) task.updateCategory(updates.category);
+            if (updates.priority !== undefined) task.updatePriority(updates.priority);
+            if (updates.status !== undefined) task.updateStatus(updates.status);
+            if (updates.dueDate !== undefined) task.setDueDate(updates.dueDate);
+            if (updates.assigneeId !== undefined) task.assignTo(updates.assigneeId);
+            if (updates.estimatedHours !== undefined) task.setEstimatedHours(updates.estimatedHours);
+            if (updates.addTimeSpent !== undefined) task.addTimeSpent(updates.addTimeSpent);
+            if (updates.addTag !== undefined) task.addTag(updates.addTag);
+            if (updates.removeTag !== undefined) task.removeTag(updates.removeTag);
+            if (updates.addNote !== undefined) task.addNote(updates.addNote);
             
             // Persist changes
             this._saveTasksToStorage();
@@ -236,29 +211,12 @@ class TaskRepository {
     filter(filters) {
         let results = this.findAll();
         
-        if (filters.ownerId) {
-            results = results.filter(task => task.ownerId === filters.ownerId);
-        }
-        
-        if (filters.assigneeId) {
-            results = results.filter(task => task.assigneeId === filters.assigneeId);
-        }
-        
-        if (filters.category) {
-            results = results.filter(task => task.category === filters.category);
-        }
-        
-        if (filters.status) {
-            results = results.filter(task => task.status === filters.status);
-        }
-        
-        if (filters.priority) {
-            results = results.filter(task => task.priority === filters.priority);
-        }
-        
-        if (filters.overdue) {
-            results = results.filter(task => task.isOverdue);
-        }
+        if (filters.ownerId) results = results.filter(task => task.ownerId === filters.ownerId);
+        if (filters.assigneeId) results = results.filter(task => task.assigneeId === filters.assigneeId);
+        if (filters.category) results = results.filter(task => task.category === filters.category);
+        if (filters.status) results = results.filter(task => task.status === filters.status);
+        if (filters.priority) results = results.filter(task => task.priority === filters.priority);
+        if (filters.overdue) results = results.filter(task => task.isOverdue);
         
         if (filters.dueSoon) {
             results = results.filter(task => {
@@ -320,12 +278,15 @@ class TaskRepository {
     }
     
     /**
-     * Get task statistics
+     * Get task statistics (General)
      * @param {string} userId - User ID (optional, untuk stats per user)
      * @returns {Object} - Task statistics
      */
     getStats(userId = null) {
         let tasks = userId ? this.findByOwner(userId) : this.findAll();
+        
+        // Dynamic Categories from Model
+        const categories = EnhancedTask.getAvailableCategories();
         
         const stats = {
             total: tasks.length,
@@ -350,12 +311,89 @@ class TaskRepository {
             stats.byPriority[priority] = tasks.filter(task => task.priority === priority).length;
         });
         
-        // Count by category
-        ['work', 'personal', 'study', 'health', 'finance', 'other'].forEach(category => {
+        // Count by category (Dynamic)
+        categories.forEach(category => {
             stats.byCategory[category] = tasks.filter(task => task.category === category).length;
         });
         
         return stats;
+    }
+
+    /**
+     * Get task statistics by category (Detailed)
+     * @param {string} userId - User ID (optional)
+     * @returns {Object} - Statistics grouped by category
+     */
+    getCategoryStats(userId = null) {
+        let tasks = userId ? this.findByOwner(userId) : this.findAll();
+        
+        const stats = {};
+        // Menggunakan Source of Truth dari Class EnhancedTask
+        const categories = EnhancedTask.getAvailableCategories();
+        
+        // Initialize all categories with 0
+        categories.forEach(category => {
+            stats[category] = {
+                total: 0,
+                completed: 0,
+                pending: 0,
+                overdue: 0
+            };
+        });
+        
+        // Count tasks in each category
+        tasks.forEach(task => {
+            const category = task.category;
+            // Pastikan kategori ada di stats (untuk handle kategori legacy jika ada)
+            if (!stats[category]) {
+                 stats[category] = { total: 0, completed: 0, pending: 0, overdue: 0 };
+            }
+
+            stats[category].total++;
+            
+            if (task.isCompleted) {
+                stats[category].completed++;
+            } else {
+                stats[category].pending++;
+            }
+            
+            if (task.isOverdue) {
+                stats[category].overdue++;
+            }
+        });
+        
+        return stats;
+    }
+
+    /**
+     * Get most used categories
+     * @param {string} userId - User ID (optional)
+     * @param {number} limit - Number of categories to return
+     * @returns {Array} - Array of categories sorted by usage
+     */
+    getMostUsedCategories(userId = null, limit = 5) {
+        const stats = this.getCategoryStats(userId);
+        
+        // Helper untuk mapping display name (Hardcoded di sini agar aman/tidak brittle)
+        const categoryNames = {
+            'work': 'Work & Business',
+            'personal': 'Personal',
+            'study': 'Study & Learning',
+            'health': 'Health & Fitness',
+            'finance': 'Finance & Money',
+            'shopping': 'Shopping',
+            'other': 'Other'
+        };
+
+        return Object.entries(stats)
+            .sort(([,a], [,b]) => b.total - a.total)
+            .slice(0, limit)
+            .map(([category, data]) => ({
+                category,
+                count: data.total,
+                // Fallback ke raw category jika tidak ada di map
+                displayName: categoryNames[category] || category 
+            }));
     }
     
     // Private methods
